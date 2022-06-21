@@ -53,10 +53,11 @@ def add_ec2(driver: webdriver,
             operating_system: str = 'Windows Server',
             storage_amount_in_GB: int = 200,
             units: int = 1,
+            utilization: int = 100,
             region: str = "",
             pricing_model: str = "",
             reservation_term: str = "",
-            payment_option: str =""):
+            payment_option: str = ""):
 
     # Visit EC2 page
     driver.get(ec2_link)
@@ -67,12 +68,12 @@ def add_ec2(driver: webdriver,
             id_file.write(f'{k}. {elem_id}\n')
 
     # Enter Description
-    description_elem = ids[30]
+    description_elem = ids[38]
     type_and_enter(driver, element_id=description_elem, entry=ec2_description)
 
     # Set the region if needed
     if region:
-        region_elem = ids[33]
+        region_elem = ids[41]
         click_element(driver, element_id=region_elem)
         region_selection_elem = f"{region_elem}-dropdown-option-{ec2_region_map[region]}"
         click_element(driver, element_id=region_selection_elem)
@@ -84,28 +85,27 @@ def add_ec2(driver: webdriver,
         actions.perform()
 
     # Get ids of the important fields
-    os_elem = ids[43]
+    # OS Selection
+    os_elem = ids[51]
     os_selection_elem = f"{'-'.join(os_elem.split('-')[:3])}-dropdown-option-{ec2_os_map[operating_system]}"
-    instance_name_elem = ids[49]
-    quantity_elem = ids[66]
-
-    storage_elem = ids[100]
-    storage_selection_elem = f"{'-'.join(storage_elem.split('-')[:3])}-dropdown-option-{ec2_storage_map[storage_type]}"
-    storage_amount_elem = ids[104]
-    submit_button_xpath = '//*[@id="e-c2next"]/div/div[2]/div/div/awsui-button[2]/button'
-
-    # Start clicking those elements
     click_element(driver, element_id=os_elem)
     click_element(driver, element_id=os_selection_elem)
-    click_element(driver, element_id=instance_name_elem)
 
+    # Instance Type
+    instance_name_elem = ids[57]
+    click_element(driver, element_id=instance_name_elem)
     # Get id of the newly appearing textbox for instance type
     new_ids = [elem.get_attribute('id') for elem in driver.find_elements_by_xpath('//*[@id]')]
-    instance_type_elem = new_ids[50]
-
+    instance_type_elem = new_ids[58]
     type_and_enter(driver, element_id=instance_type_elem, entry=instance)
-    type_and_enter(driver, element_id=quantity_elem, entry=str(units))
 
+    # Quantity and Utilization
+    quantity_elem = ids[74]
+    type_and_enter(driver, element_id=quantity_elem, entry=str(units))
+    utilization_elem = ids[77]
+    type_and_enter(driver, element_id=utilization_elem, entry=str(utilization))
+
+    # Pricing Model
     if pricing_model:
         pricing_elem = ids[ec2_pricing_model[pricing_model]]
         reserve_term_elem = ids[ec2_reservation_term[reservation_term]]
@@ -115,11 +115,16 @@ def add_ec2(driver: webdriver,
         click_element(driver, element_id=reserve_term_elem)
         click_element(driver, element_id=payment_option_elem)
 
+    # Storage
+    storage_elem = ids[108]
+    storage_selection_elem = f"{'-'.join(storage_elem.split('-')[:3])}-dropdown-option-{ec2_storage_map[storage_type]}"
+    storage_amount_elem = ids[112]
     click_element(driver, element_id=storage_elem)
     click_element(driver, element_id=storage_selection_elem)
     type_and_enter(driver, element_id=storage_amount_elem, entry=str(storage_amount_in_GB))
 
     # Submit
+    submit_button_xpath = '//*[@id="e-c2next"]/div/div[2]/div/div/awsui-button[2]/button'
     submit_button = WebDriverWait(driver, 2).until(
         EC.presence_of_element_located((By.XPATH, submit_button_xpath))
     )
@@ -131,18 +136,18 @@ if __name__ == '__main__':
     chrome_driver.get(calculator_link)
     add_ec2(driver=chrome_driver,
             ec2_description="EC2-1",
-            region="Asia Pacific (Singapore)",
+            region="Asia Pacific (Jakarta)",
             instance="t3.small",
             pricing_model="Compute Savings Plans",
             reservation_term="1 Year",
-            payment_option="All Upfront")
+            payment_option="No Upfront")
     add_ec2(driver=chrome_driver,
             ec2_description="EC2-1",
-            region="Asia Pacific (Singapore)",
+            region="Asia Pacific (Jakarta)",
             instance="t3.small",
             pricing_model="Compute Savings Plans",
             reservation_term="3 Year",
             payment_option="No Upfront")
-    add_ec2(driver=chrome_driver, ec2_description="EC2-2", instance="t3.xlarge", storage_type="io2", storage_amount_in_GB=1000)
-    add_ec2(driver=chrome_driver, ec2_description="EC2-3", instance="t3.medium", operating_system="Linux")
-    add_ec2(driver=chrome_driver, ec2_description="EC2-3", instance="t3.2xlarge", storage_type="gp2")
+    # add_ec2(driver=chrome_driver, ec2_description="EC2-2", instance="t3.xlarge", storage_type="io2", storage_amount_in_GB=1000)
+    # add_ec2(driver=chrome_driver, ec2_description="EC2-3", instance="t3.medium", operating_system="Linux")
+    # add_ec2(driver=chrome_driver, ec2_description="EC2-3", instance="t3.2xlarge", storage_type="gp2")

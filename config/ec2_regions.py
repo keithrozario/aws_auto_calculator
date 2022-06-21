@@ -5,5 +5,6 @@ ec2_region_map = {
     "Asia Pacific (KDDI) - Tokyo": "3",
     "Asia Pacific (Mumbai)": "7",
     "Asia Pacific (Singapore)": "8",
+    "Asia Pacific (Jakarta)": "22",
     "US East (N. Virginia)": "19",
 }
